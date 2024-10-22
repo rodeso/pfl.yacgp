@@ -84,14 +84,15 @@ adjacentAuxB ((a, b , d):others) city =
 -- 5. pathDistance returns the sum of all individual distances in a path between two cities in a Just value, if all the consecutive pairs of cities are directly connected by roads. Otherwise, it returns a Nothing.
 
 pathDistance :: RoadMap -> Path -> Maybe Distance
-pathDistance road path = calculateTotalDistance road (zip path (tail path))
+pathDistance _ [] = Just 0
+pathDistance _ [_] = Just 0
+pathDistance road (p1:p2:ps) = calculateTotalDistance road ((p1, p2) : zip (p2:ps) ps)
 
-calculateTotalDistance :: RoadMap -> Path -> Maybe Distance
-calculateTotalDistance _ [] = Nothing
-calculateTotalDistance _ [_] = Nothing
-calculateTotalDistance road (a:b:xs) = do
+calculateTotalDistance :: RoadMap -> [(City, City)] -> Maybe Distance
+calculateTotalDistance _ [] = Just 0
+calculateTotalDistance road ((a, b):xs) = do
   dist <- distance road a b
-  restDist <- calculateTotalDistance road (b:xs)
+  restDist <- calculateTotalDistance road xs
   return (dist + restDist)
 
 ---
