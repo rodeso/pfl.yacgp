@@ -1,4 +1,4 @@
---import qualified Data.List
+import qualified Data.List
 --import qualified Data.Array
 --import qualified Data.Bits
 
@@ -98,7 +98,19 @@ calculateTotalDistance road ((a, b):xs) = do
 ---
 
 rome :: RoadMap -> [City]
-rome = undefined
+rome roadMap =
+  let
+    connectionsCount = romeAux roadMap
+    maxDegree = maximum (map snd connectionsCount)
+  in [city | (city, degree) <- connectionsCount, degree == maxDegree]
+
+
+romeAux :: RoadMap -> [(City, Int)]
+romeAux roadMap =
+  let
+    allCities = [city | (city1, city2, _) <- roadMap, city <- [city1, city2]]
+    groupedCities = Data.List.group $ Data.List.sort allCities
+    in [(c, length cities) | (c: cities) <- groupedCities]
 
 ---
 
