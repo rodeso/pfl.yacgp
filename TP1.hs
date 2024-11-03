@@ -146,7 +146,31 @@ bfs roadMap start = bfs' [start] []
 -- shortestPath computes all shortest paths [RL99, BG20] connecting the two cities given as input.
 -- Note that there may be more than one path with the same total distance. If there are no paths between the input cities, then return an empty list. Note that the (only) shortest path between a city c and itself is [c].
 shortestPath :: RoadMap -> City -> City -> [Path]
-shortestPath = undefined
+shortestPath roadMap start end =
+    let allPaths = bfsPaths roadMap start end  -- Get all paths using BFS
+        -- Calculate distances for each path, using Just or Nothing
+        distances = [(path, pathDistance roadMap path) | path <- allPaths]
+        -- Filter out valid paths and find the minimum distance
+        validDistances = [dist | (path, Just dist) <- distances]
+        minDistance = minimum validDistances  -- Find the minimum distance
+    in [path | (path, Just dist) <- distances, dist == minDistance]  -- Filter paths by the minimum distance
+
+
+bfsPaths :: RoadMap -> City -> City -> [Path]
+bfsPaths roadMap start end = bfsPaths' [(start, [start])] end [] []  
+    where
+        bfsPaths' :: [(City, Path)] -> City -> [City] -> [Path] -> [Path]
+        bfsPaths' [] _ _ paths = paths
+        bfsPaths' ((currentCity,path):queue) end visited paths
+            | currentCity == end = bfsPaths' queue end visited (paths ++ [path])
+            | currentCity `elem` visited = bfsPaths' queue end visited paths
+            | otherwise =
+                let 
+                    adj = [nextCity | (nextCity, _) <- adjacent roadMap currentCity]
+                    newPaths = [(nextCity, path ++ [nextCity]) | nextCity <- adj, nextCity `notElem` visited]
+                in 
+                    bfsPaths' (queue ++ newPaths) end (currentCity : visited) paths
+
 
 ---
 
@@ -199,10 +223,7 @@ gTest9 :: RoadMap
 gTest9 = [("Center", "A", 2), ("Center", "B", 4), ("Center", "C", 6), ("Center", "D", 8)]
 
 
-
-
 -- Menu
-
 main :: IO ()
 main = do
     putStrLn "\nSelect an option:"
