@@ -198,5 +198,123 @@ gTest8 = [("A", "B", 3), ("A", "C", 4), ("B", "D", 2), ("B", "E", 1), ("C", "F",
 gTest9 :: RoadMap
 gTest9 = [("Center", "A", 2), ("Center", "B", 4), ("Center", "C", 6), ("Center", "D", 8)]
 
-gTest10 :: RoadMap 
-gTest10 = [("0", "1", 10), ("0", "2", 15), ("0", "3", 20), ("1", "2", 35), ("1", "3", 25)]
+
+
+
+-- Menu
+
+main :: IO ()
+main = do
+    putStrLn "\nSelect an option:"
+    putStrLn "1. List all cities"
+    putStrLn "2. Check if two cities are adjacent"
+    putStrLn "3. Get distance between two cities"
+    putStrLn "4. Find adjacent cities and distances"
+    putStrLn "5. Calculate path distance"
+    putStrLn "6. Find cities with the highest number of connections"
+    putStrLn "7. Check if graph is strongly connected"
+    putStrLn "8. Find shortest path between two cities"
+    putStrLn "9. Solve traveling salesman problem (TSP)"
+    putStrLn "0. Exit"
+    putStrLn "Enter your choice (0-9): "
+    choice <- getLine
+
+    if choice == "0"
+        then putStrLn "Exiting program."
+        else do
+            putStrLn "\nChoose a RoadMap:"
+            putStrLn "1. gTest1"
+            putStrLn "2. gTest2"
+            putStrLn "3. gTest3"
+            putStrLn "4. gTest4"
+            putStrLn "5. gTest5"
+            putStrLn "6. gTest6"
+            putStrLn "7. gTest7"
+            putStrLn "8. gTest8"
+            putStrLn "9. gTest9"
+            putStrLn "0. Custom input"
+            putStrLn "Enter your choice (1-4): "
+            mapChoice <- getLine
+            roadMap <- case mapChoice of
+                "1" -> return gTest1
+                "2" -> return gTest2
+                "3" -> return gTest3
+                "4" -> return gTest4
+                "5" -> return gTest5
+                "6" -> return gTest6
+                "7" -> return gTest7
+                "8" -> return gTest8
+                "9" -> return gTest9
+                "0" -> getCustomRoadMap
+                _   -> do
+                    putStrLn "Invalid choice, defaulting to gTest1."
+                    return gTest1
+
+            runFunction choice roadMap
+            main
+
+---
+
+runFunction :: String -> RoadMap -> IO ()
+runFunction choice roadMap = case choice of
+    "1" -> print (cities roadMap)
+    "2" -> do
+        (city1, city2) <- getCityPair
+        print (areAdjacent roadMap city1 city2)
+    "3" -> do
+        (city1, city2) <- getCityPair
+        print (distance roadMap city1 city2)
+    "4" -> do
+        city <- getCity
+        print (adjacent roadMap city)
+    "5" -> do
+        path <- getPath
+        print (pathDistance roadMap path)
+    "6" -> print (rome roadMap)
+    "7" -> print (isStronglyConnected roadMap)
+    "8" -> do
+        (start, end) <- getCityPair
+        print (shortestPath roadMap start end)
+    "9" -> print (travelSales roadMap)
+    _   -> putStrLn "Invalid option selected."
+
+---
+
+getCity :: IO City
+getCity = do
+    putStrLn "Enter city name: "
+    getLine
+
+getCityPair :: IO (City, City)
+getCityPair = do
+    putStrLn "Enter the first city: "
+    city1 <- getLine
+    putStrLn "Enter the second city: "
+    city2 <- getLine
+    return (city1, city2)
+
+getPath :: IO Path
+getPath = do
+    putStrLn "Enter a path (list of city names separated by spaces): "
+    fmap words getLine
+
+getCustomRoadMap :: IO RoadMap
+getCustomRoadMap = do
+    putStrLn "Enter roads in the format (city1, city2, distance), one per line. Enter an empty line to finish."
+    getRoadEntries []
+
+getRoadEntries :: RoadMap -> IO RoadMap
+getRoadEntries entries = do
+    line <- getLine
+    if null line
+        then return entries
+        else case readMaybe line of
+            Just road -> getRoadEntries (road : entries)
+            Nothing   -> do
+                putStrLn "Invalid format. Enter again (e.g., (\"City1\", \"City2\", 10))."
+                getRoadEntries entries
+
+readMaybe :: Read a => String -> Maybe a
+readMaybe str = case reads str of
+    [(val, "")] -> Just val
+    _           -> Nothing
