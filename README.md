@@ -17,13 +17,6 @@ Yet Another Country-Graph Program
 
 ---
 
-## Contributions
-- Leonor:
-    - bla bla bla
-- Rodrigo:
-    - bla bla bla
-
-
 ## ShortestPath
 
 ## TravelSalesman
